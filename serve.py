@@ -43,20 +43,32 @@ def change_state(state):
 @override("404")
 def handler(o, arguments, action):
 	ret = ""
+	arguments = prepare_args(arguments)
 	if param.params['online']:
 		ret = callrest(domain=param.params['real_domain'], port=param.params['real_port'], path=o.path, type=action,params=arguments,timeout=30)
-		if ret[0] == 200:
+		if not ret[0]:
+			# Server Not available, serve from cache (if available).
+			logging.info("Server not available : Read from cache.")
+			return build_response_from_cache(o, arguments, action)
+		elif ret[0] == 200:
 			save_return([o.path, arguments, action], ret[2])
-			ret = ret[2]
-			return {"content":ret,"code":200}
-		else:
-			return {"content":ret,"code":ret[0]}
+		
+		ret = ret[2]
+		return {"content":ret,"code":200}
 	else:
-		try:
-			ret = get_return([o.path, arguments, action])
-			return {"content":ret,"code":200}
-		except:
-			return {"content":"Not Availalble","code":404}
+		return build_response_from_cache(o, arguments, action)
+
+def build_response_from_cache(o, arguments, action):
+	try:
+		ret = get_return([o.path, arguments, action])
+		return {"content":ret,"code":200}
+	except:
+		return {"content":"Not Available","code":404}
+
+def prepare_args(arguments):
+	for argument in arguments:
+		arguments[argument] = arguments[argument].pop()
+	return arguments
 
 @route("/api_proxy/online")
 def internal_online():
