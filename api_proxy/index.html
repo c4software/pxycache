@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>    
+	<title>pxyCache</title>
+	<meta charset="utf-8" />
+	<meta name="author" content="Valentin Brosseau">
+
+	<link rel="stylesheet" href="/api_proxy/static/bootstrap.min.css">
+	<link rel="stylesheet" href="/api_proxy/static/main.css">
+
+	<script src="/api_proxy/static/jquery-2.1.0.min.js"></script>
+
+</head>
+
+<body id="index">
+
+	<nav class="navbar navbar-default" role="navigation">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="#">pxyCache</a>
+			<ul class="nav navbar-nav navbar-right">
+				<li><a class="important" href="#" id="state">online</a></li>
+			</ul>
+		</div>
+	</nav>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-md-11" role="main">
+				<h1 class="page-header">Control panel</h1>
+
+				<h3>Switch State</h3>
+				<div class="col-md-12">
+					<div class="callout callout-info">
+						<h4>Switch state</h4>
+						<p><b>Online</b>: All content will be serve from the real server, if the real server became unavailable data will be serve from cache.</p>
+						<p><b>Offline</b>: All content will be serve from the cache</p>
+					</div>
+
+					<div>
+						<a href="/api_proxy/online" class="btn btn-success">Go online</a>
+
+						<a href="/api_proxy/offline" class="btn btn-danger">Go offline</a>
+					</div>
+				</div>
+
+				<div class="clear"></div>
+
+				<h3>Manage Cache</h3>
+				<div class="col-md-12">
+					<div class="callout callout-info">
+						<h4>Manage Cache</h4>
+						<br />
+						<p>
+							<input type="button" class="btn btn-info" value="Get the current state" id="getData" />
+							<input type="button" class="btn btn-danger pull-right" value="ERASE ALL DATA" id="eraseData" />
+						</p>
+					</div>
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Type</th>
+								<th>Path</th>
+								<th>Parameters</th>
+							</tr>
+						</thead>
+						<tbody id="cacheData"></tbody>
+					</table>
+				</div>
+
+				<div class="clear"></div>
+
+				<h3>Stub-IT</h3>
+				<div class="col-md-12">
+					<div class="callout callout-info">
+						<h4>Stub-IT</h4>
+						<p>Create a Fake entry in the cache, simulate data from the server <b>(Only if pxyCache is in offline)</b></p>
+					</div>
+
+					<form role="form" action="/api_proxy/cache_it">
+						<div class="form-group">
+							<label for="exampleInputEmail1">Request Type</label>
+							<select name="action" class="form-control">
+								<option>GET</option>								
+								<option>POST</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label for="exampleInputPassword1">Arguments</label>
+							<input type="text" value=""class="form-control" name="arguments" placeholder="Arguments (arg=1&arg2=2)" />
+							<p class="help-block">Example: arg=1&arg2=2</p>
+						</div>
+						<div class="form-group">
+							<label for="exampleInputFile">Data to cache</label>
+							<textarea name="data" class="form-control"></textarea>
+						</div>
+						<button type="submit" class="btn btn-info">Stub-IT!</button>
+					</form>
+				</div>
+
+				<div class="clear"><br /></div>
+
+			</div>
+		</div>
+	</div>
+
+	<script>
+		$(function() {
+			get_state();
+			$("#getData").bind("click", get_cache_data);
+			$("#eraseData").bind("click", erase_data);
+			window.setInterval(get_state, 60000);
+		});
+
+		function erase_data(){
+			if(confirm('Erase all cache data ?'))
+			{
+				window.location = "/api_proxy/eraseCacheData";
+			}
+		}
+
+		function get_cache_data(){
+			$('#cacheData').html("");
+			$.ajax({
+				url: "/api_proxy/getCacheData",
+				}).done(function(data) {
+					data = JSON.parse(data);
+					for (elem in data){
+						line = "<tr><th>"+data[0][2]+"</th><td>"+data[0][0]+"</td><td>"+JSON.stringify(data[0][1])+"</td></tr>";
+						$('#cacheData').append(line);
+					}
+				});
+		}
+
+		function get_state(){
+			$.ajax({
+				url: "/api_proxy/state",
+				}).done(function(data) {
+					$("#state").attr("class", "important "+data);
+					$("#state").html(data);
+				});
+		}
+	</script>
+
+</body>
+
+</html>

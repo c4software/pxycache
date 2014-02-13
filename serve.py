@@ -1,5 +1,6 @@
 import json
-import hashlib
+import shutil
+import base64
 import argparse
 import logging
 import os
@@ -10,13 +11,19 @@ import param
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 
+
+
 # TODO
 # Type requete.
 # Memorisation du tableau des resultats
 
+def get_path(elem):
+	# hash_dict = hashlib.md5(json.dumps(elem)).hexdigest()
+	hash_dict = base64.b64encode(json.dumps(elem))
+	return "{0}{1}".format(param.params['cache_path'], hash_dict)
+
 def save_return(elem, ret):
-	hash_dict = hashlib.md5(json.dumps(elem)).hexdigest()
-	path_file = "{0}{1}".format(param.params['cache_path'], hash_dict)
+	path_file = get_path(elem)
 	logging.info("WRITE CACHE {0}".format(path_file))
 
 	with open(path_file, 'w') as f:
@@ -24,8 +31,7 @@ def save_return(elem, ret):
 	f.close()
 
 def get_return(elem):
-	hash_dict = hashlib.md5(json.dumps(elem)).hexdigest()
-	path_file = "{0}{1}".format(param.params['cache_path'], hash_dict)
+	path_file = get_path(elem)
 	try:
 		ret = ""
 		with open(path_file, 'r') as f:
@@ -70,16 +76,62 @@ def prepare_args(arguments):
 		arguments[argument] = arguments[argument].pop()
 	return arguments
 
+def get_template(file):
+	with open("template/{0}".format(file)) as f:
+		return f.read()
+	return ""
+
+@route("/api_proxy")
+@route("/api_proxy/")
+def api_index():
+	return redirect("/api_proxy/index.html")
+
+@route("/api_proxy/eraseCacheData")
+def internal_eraseCacheData():
+	shutil.rmtree(param.params['cache_path'])
+	os.makedirs(param.params['cache_path'])
+	return redirect("/api_proxy/index.html")
+
+@route("/api_proxy/getCacheData")
+def internal_getCacheData():
+	inCache = []
+	for f in os.listdir(param.params['cache_path']):
+		if os.path.isfile(param.params['cache_path']+f):
+			try:
+				inCache.append(json.loads(base64.b64decode(f)))
+			except Exception, e:
+				logging.error("Impossible to read {0}: {1}".format(f, e))
+	return json.dumps(inCache)
+
+@route("/api_proxy/state")
+def internal_state():
+	if param.params['online']:
+		return "Online"
+	else:
+		return "Offline"
+
 @route("/api_proxy/online")
 def internal_online():
 	param.params['online'] = True
-	return "Online"
+	return redirect("/api_proxy/index.html")
 
 @route("/api_proxy/offline")
 def internal_offline():
 	param.params['online'] = False
-	return "Offline"
+	return redirect("/api_proxy/index.html")
 
+@route("/api_proxy/cache_it", ["POST"])
+def cache_it(**args):
+	args = prepare_args(args)
+	if "arguments" in args:
+		from urlparse import parse_qs
+		arguments = prepare_args(parse_qs(args.get("arguments")))
+	else:
+		arguments = {}
+
+	save_return([args.get("path", ""), arguments, args.get("action", "")], args.get("data",""))
+	return redirect("/api_proxy/stub_it")
+	
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='API Proxy')
 	parser.add_argument('--port', default=5000, type=int, help='Listen port of the proxy (default 5000)')

@@ -1,0 +1,40 @@
+.important{
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+.Offline{
+	color: #A94442 !important;
+}
+
+.Online{
+	color: #3C763D !important;
+}
+
+.clear{
+	clear: both;
+}
+
+.center{
+	text-align: center;
+}
+
+.callout-info {
+	background-color: #F4F8FA;
+	border-color: #5BC0DE;
+}
+.callout {
+	margin: 20px 0;
+	padding: 20px;
+	border-left: 3px solid #EEE;
+}
+.callout-info h4 {
+	color: #5BC0DE;
+}
+.callout h4 {
+	margin-top: 0;
+	margin-bottom: 5px;
+}
+.callout p:last-child {
+	margin-bottom: 0;
+}
