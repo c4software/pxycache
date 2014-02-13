@@ -1,7 +1,7 @@
-pxycache
+pxyCache
 ========
 
-PxyCache is a simple Proxy, With offline capacities.
+PxyCache is a simple Proxy, With offline capacities. pxyCache also provide an Admin Panel to help developpers to see and manage the cache of his "Proxy".
 
 ## Usage
 
@@ -19,18 +19,12 @@ its mean its serve the content from your __local cache__ _if exist_
 python2 serve.py --realdomain yourdomain.tld --realport 80 --cachepath "/tmp/cache" --offline
 ```
 
-### Change the state during the execution of the proxy.
+### Manage pxyCache
 
-`important: If the real domain became unavailable during the execution, the proxy will automatically switch in offline state for the request and serve the cached data if available.`
+Management can be done via curl call, or most simply with the Interface
 
-#### Put Online
+![Management Interface](./api_proxy/static/pxyCache.png "Management Interface")
 
-```bash
-curl http://localhost:5000/api_proxy/online
-```
+### State of the proxy
 
-#### Put Offline
-
-```bash
-curl http://localhost:5000/api_proxy/offline
-```
+If the real domain became unavailable during the execution, the proxy will automatically switch in offline state for the request and serve the cached data if available.
