@@ -86,12 +86,6 @@ def get_template(file):
 def api_index():
 	return redirect("/api_proxy/index.html")
 
-@route("/api_proxy/eraseCacheData")
-def internal_eraseCacheData():
-	shutil.rmtree(param.params['cache_path'])
-	os.makedirs(param.params['cache_path'])
-	return redirect("/api_proxy/index.html")
-
 @route("/api_proxy/getCacheData")
 def internal_getCacheData():
 	inCache = []

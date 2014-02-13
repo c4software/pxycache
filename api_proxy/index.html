@@ -52,7 +52,6 @@
 						<br />
 						<p>
 							<input type="button" class="btn btn-info" value="Get the current state" id="getData" />
-							<input type="button" class="btn btn-danger pull-right" value="ERASE ALL DATA" id="eraseData" />
 						</p>
 					</div>
 					<table class="table">
@@ -107,16 +106,8 @@
 		$(function() {
 			get_state();
 			$("#getData").bind("click", get_cache_data);
-			$("#eraseData").bind("click", erase_data);
 			window.setInterval(get_state, 60000);
 		});
-
-		function erase_data(){
-			if(confirm('Erase all cache data ?'))
-			{
-				window.location = "/api_proxy/eraseCacheData";
-			}
-		}
 
 		function get_cache_data(){
 			$('#cacheData').html("");
