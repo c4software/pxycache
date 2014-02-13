@@ -3,9 +3,16 @@ pxyCache
 
 PxyCache is a simple Proxy, With offline capacities. pxyCache also provide an Admin Panel to help developpers to see and manage the cache of his "Proxy".
 
+The term « Proxy » means all request you made (GET, POST) on http://localhost:5000/ are automaticaly send to the real server you have config.
+
 I made this tool to be less dependent from the Back Office in the developpement process. I can work even if the Back office became unavailable.
 
 ## Usage
+
+1. Start the « Proxy ».
+2. Acces to http://localhost:5000/ its automatically call the equivalent in the real server.
+3. Manage your proxy => http://localhost:5000/api_proxy/
+4. Profit!
 
 ### Start the "Proxy" in online state
 its mean its serve the content of the __real domain__
@@ -28,7 +35,9 @@ If the real domain became unavailable during the execution, the proxy will autom
 
 ## Manage pxyCache
 
-Management can be done via curl call, or most simply with the Interface
+Management can be done via curl call, or most simply with the Interface.
+
+Url to acces it : http://localhost:5000/api_proxy/
 
 ![Management Interface](./api_proxy/static/pxyCache.png "Management Interface")
 
