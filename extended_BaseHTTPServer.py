@@ -67,7 +67,8 @@ class extended_BaseHTTPServer(BaseHTTPServer.BaseHTTPRequestHandler):
 					else:
 						retour = handler_method['404'](o, arguments, action)
 						build_response(s, retour, 404)
-		except:
+		except Exception as e:
+			logging.error(e)
 			# Gestion des erreurs
 			if "500" not in handler_method:
 				build_response(s, "Internal Server Error", 500)
@@ -92,7 +93,7 @@ def build_response(output, retour, code=200):
 
 
 def redirect(location=""):
-	return {"content":"","code":301,"Location":location}
+	return {"content":"","code":302,"Location":location}
 
 def serve(ip="0.0.0.0", port=5000):
 	httpd = BaseHTTPServer.HTTPServer((ip, port), extended_BaseHTTPServer)
