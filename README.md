@@ -3,6 +3,8 @@ pxyCache
 
 PxyCache is a simple Proxy, With offline capacities. pxyCache also provide an Admin Panel to help developpers to see and manage the cache of his "Proxy".
 
+I made this tool to be less dependent from the Back Office in the developpement process. I can work even if the Back office became unavailable.
+
 ## Usage
 
 ### Start the "Proxy" in online state
