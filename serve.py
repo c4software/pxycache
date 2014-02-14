@@ -58,9 +58,11 @@ def handler(o, arguments, action):
 			return build_response_from_cache(o, arguments, action)
 		elif ret[0] == 200:
 			save_return([o.path, arguments, action], ret[2])
+		else:
+			logging.info('Got {0} from the server, not and error but...'.format(ret[0]))
 		
 		ret = ret[2]
-		return {"content":ret,"code":200}
+		return {"content":ret,"code":ret[0]}
 	else:
 		return build_response_from_cache(o, arguments, action)
 
