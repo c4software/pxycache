@@ -123,8 +123,8 @@ def cache_it(**args):
 	else:
 		arguments = {}
 
-	save_return([args.get("path", ""), arguments, args.get("action", "")], args.get("data",""))
-	return redirect("/api_proxy/stub_it")
+	save_return([args.get("path", ""), arguments, args.get("action", "")], args.get("data","").encode("utf-8"))
+	return redirect("/api_proxy/index.html")
 	
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='API Proxy')
