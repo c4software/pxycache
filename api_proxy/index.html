@@ -120,7 +120,7 @@
 				}).done(function(data) {
 					data = JSON.parse(data);
 					for (elem in data){
-						line = "<tr><th>"+data[0][2]+"</th><td>"+data[0][0]+"</td><td>"+JSON.stringify(data[0][1])+"</td></tr>";
+						line = "<tr><th>"+data[elem][2]+"</th><td>"+data[elem][0]+"</td><td>"+JSON.stringify(data[elem][1])+"</td></tr>";
 						$('#cacheData').append(line);
 					}
 				});
