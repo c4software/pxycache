@@ -1,6 +1,6 @@
 import json
 import shutil
-import base64
+import hashlib
 import argparse
 import logging
 import os
@@ -11,16 +11,28 @@ import param
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-
-
-# TODO
-# Type requete.
-# Memorisation du tableau des resultats
-
 def get_path(elem):
-	# hash_dict = hashlib.md5(json.dumps(elem)).hexdigest()
-	hash_dict = base64.b64encode(json.dumps(elem))
+	hash_dict = hashlib.md5(json.dumps(elem)).hexdigest()
+	# hash_dict = base64.b64encode(json.dumps(elem))
 	return "{0}{1}".format(param.params['cache_path'], hash_dict)
+
+# Populate the json of all cached url.
+def saveCacheHistory(elem):
+	param.params['inCache'][elem[0]] = elem
+	path_file = "{0}{1}".format(param.params['cache_path'], "cacheHistory.json")
+	with open(path_file, 'w') as f:
+		f.write(json.dumps(param.params['inCache']))
+	f.close()
+
+def initCacheHistory():
+	try:
+		path_file = "{0}{1}".format(param.params['cache_path'], "cacheHistory.json")
+		with open(path_file, 'r') as f:
+			param.params['inCache'] = json.loads(f.read())
+		f.close()
+	except Exception, e:
+		logging.error("Cache history can't be loaded. ({0})".format(e))
+
 
 def save_return(elem, ret):
 	path_file = get_path(elem)
@@ -29,6 +41,8 @@ def save_return(elem, ret):
 	with open(path_file, 'w') as f:
 		f.write(ret)
 	f.close()
+
+	saveCacheHistory(elem)
 
 def get_return(elem):
 	path_file = get_path(elem)
@@ -91,14 +105,8 @@ def api_index():
 
 @route("/api_proxy/getCacheData")
 def internal_getCacheData():
-	inCache = []
-	for f in os.listdir(param.params['cache_path']):
-		if os.path.isfile(param.params['cache_path']+f):
-			try:
-				inCache.append(json.loads(base64.b64decode(f)))
-			except Exception, e:
-				logging.error("Impossible to read {0}: {1}".format(f, e))
-	return json.dumps(inCache)
+	inCache = param.params['inCache']
+	return json.dumps([inCache[f] for f in inCache])
 
 @route("/api_proxy/state")
 def internal_state():
@@ -152,6 +160,8 @@ if __name__ == '__main__':
 		param.params['online'] = False
 	if args.online:
 		param.params['online'] = True
+
+	initCacheHistory()
 
 	logging.info("Server listen 0.0.0.0:{0} => {1}:{2}".format(args.port, args.realdomain, args.realport))
 	serve(ip="0.0.0.0", port=args.port)
