@@ -1,7 +1,7 @@
 pxyCache
 ========
 
-PxyCache is a simple Proxy, With offline capacities. pxyCache also provide an Admin Panel to help developpers/users to see and manage the cache of the "Proxy".
+PxyCache is a simple Proxy, With offline capacities. pxyCache also provide an Admin Panel to see and manage the cache of the "Proxy".
 
 The term « Proxy » means all request you made (GET, POST) on http://localhost:5000/ are automaticaly send to the real server you have config.
 
