@@ -34,12 +34,12 @@ def initCacheHistory():
 		logging.error("Cache history can't be loaded. ({0})".format(e))
 
 
-def save_return(elem, ret):
+def save_return(elem, ret, ret_headers):
 	path_file = get_path(elem)
 	logging.info("WRITE CACHE {0}".format(path_file))
-
+	data = {"ret": ret, "ret_headers": ret_headers, "extra": elem}
 	with open(path_file, 'w') as f:
-		f.write(ret)
+		f.write(json.dumps(data))
 	f.close()
 
 	saveCacheHistory(elem)
@@ -49,7 +49,7 @@ def get_return(elem):
 	try:
 		ret = ""
 		with open(path_file, 'r') as f:
-			ret = f.read()
+			ret = json.loads(f.read())
 		f.close()
 		logging.info("READ CACHE {0}".format(path_file))
 		return ret
@@ -61,30 +61,37 @@ def change_state(state):
 	param.online = state
 
 @override("404")
-def handler(o, arguments, action):
+def handler(o, arguments, action, headers):
 	ret = ""
 	arguments = prepare_args(arguments)
+
 	if param.params['online']:
-		ret = callrest(domain=param.params['real_domain'], port=param.params['real_port'], path=o.path, type=action,params=arguments,timeout=30)
+		ret = callrest(domain=param.params['real_domain'], port=param.params['real_port'], path=o.path, type=action,params=arguments,timeout=30, headers=headers)
 		if not ret[0]:
 			# Server Not available, serve from cache (if available).
 			logging.info("Server not available : Read from cache.")
-			return build_response_from_cache(o, arguments, action)
+			return build_response_from_cache(o, arguments, action, headers)
 		elif ret[0] == 200:
-			save_return([o.path, arguments, action], ret[2])
+			save_return([o.path, arguments, action, headers], ret[2], ret[3])
 		else:
-			logging.info('Got {0} from the server, not and error but...'.format(ret[0]))
-		
-		code = int(ret[0])
-		ret = ret[2]
-		return {"content": ret,"code": code}
-	else:
-		return build_response_from_cache(o, arguments, action)
+			logging.info('Got {0} from the server, not an error but...'.format(ret[0]))
 
-def build_response_from_cache(o, arguments, action):
+		code = int(ret[0])
+		return_headers = ret[3]
+		ret = ret[2]
+		ret = {"content": ret, "code": code}
+		return dict(ret.items()+return_headers.items())
+	else:
+		return build_response_from_cache(o, arguments, action, headers)
+
+def build_response_from_cache(o, arguments, action, headers):
 	try:
-		ret = get_return([o.path, arguments, action])
-		return {"content":ret,"code":200}
+		ret 		= get_return([o.path, arguments, action, headers])
+		extra 		= ret.get("extra", [o.path, arguments, action, {}])
+		ret_headers = ret.get("ret_headers", {})
+		ret 		= {"content":ret.get("ret", ret),"code":200}
+		ret 		= dict(ret.items()+ret_headers.items())
+		return ret
 	except:
 		return {"content":"Not Available","code":404}
 
@@ -136,7 +143,7 @@ def cache_it(**args):
 
 	save_return([args.get("path", ""), arguments, args.get("action", "")], args.get("data","").encode("utf-8"))
 	return redirect("/api_proxy/index.html")
-	
+
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='API Proxy')
 	parser.add_argument('--port', default=5000, type=int, help='Listen port of the proxy (default 5000)')
@@ -165,4 +172,3 @@ if __name__ == '__main__':
 
 	logging.info("Server listen 0.0.0.0:{0} => {1}:{2}".format(args.port, args.realdomain, args.realport))
 	serve(ip="0.0.0.0", port=args.port)
-	

@@ -4,7 +4,10 @@ import os
 from urlparse import urlparse,parse_qs
 from mimetypes import types_map
 
-register_route = {"GET":{},"POST":{}}
+register_route = {"GET":{},"POST":{}, "HEAD":{}, "OPTIONS":{}}
+handler_method = {}
+
+
 def route(path="/", method=["GET"]):
 	def decorator(f):
 		for m in method:
@@ -15,17 +18,18 @@ def route(path="/", method=["GET"]):
 		return f
 	return decorator
 
-handler_method = {}
+
 def override(method=None):
 	def decorator(f):
 		handler_method[method] = f
 		return f
 	return decorator
 
+
 class extended_BaseHTTPServer(BaseHTTPServer.BaseHTTPRequestHandler):
 	def log_message(self, format, *args):
 		return ""
-		
+
 	def do_HEAD(s):
 		s.send_response(200)
 		s.send_header("Content-type", "text/html")
@@ -41,14 +45,20 @@ class extended_BaseHTTPServer(BaseHTTPServer.BaseHTTPRequestHandler):
 		o = urlparse(s.path)
 		arguments = parse_qs(o.query)
 		s.do_routing(o, arguments, "GET")
-	
+
+	def do_OPTIONS(s):
+		o = urlparse(s.path)
+		arguments = parse_qs(o.query)
+		s.do_routing(o, arguments, "OPTIONS")
+
 	def do_routing(s, o, arguments, action):
+		headers = s.headers.dict
 		try:
 			if o.path in register_route[action]:
 				retour = register_route[action][o.path](**arguments)
 				build_response(s, retour, 200)
 			else:
-				# Fichier static ?
+				# Fichier static ?"
 				try:
 					if "static" in handler_method:
 						retour = handler_method['static'](o, arguments, action)
@@ -65,10 +75,9 @@ class extended_BaseHTTPServer(BaseHTTPServer.BaseHTTPRequestHandler):
 					if "404" not in handler_method:
 						build_response(s, "404 - Not Found", 404)
 					else:
-						retour = handler_method['404'](o, arguments, action)
+						retour = handler_method['404'](o, arguments, action, headers)
 						build_response(s, retour, 404)
 		except Exception as e:
-			logging.error(e)
 			# Gestion des erreurs
 			if "500" not in handler_method:
 				build_response(s, "Internal Server Error", 500)
@@ -94,6 +103,7 @@ def build_response(output, retour, code=200):
 
 def redirect(location=""):
 	return {"content":"","code":302,"Location":location}
+
 
 def serve(ip="0.0.0.0", port=5000):
 	httpd = BaseHTTPServer.HTTPServer((ip, port), extended_BaseHTTPServer)

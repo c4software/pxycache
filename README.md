@@ -39,5 +39,4 @@ Management can be done via curl call, or most simply with the Interface.
 
 Url to acces it : http://localhost:5000/api_proxy/
 
-![Management Interface](./api_proxy/static/pxyCache.png "Management Interface")
-
+![Management Interface](./api_proxy/static/pxyCache.png "Management Interface") 
