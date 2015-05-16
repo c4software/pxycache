@@ -8,7 +8,7 @@ The term « Proxy » means all request you made (GET, POST) on http://localhost:
 I made this tool to be less dependent from the Back Office in the developpement process. I can work even if the Back office became unavailable.
 
 ## Todo
-- Store headers in cache.
+- Make headers « stubbable » from the interface.
 
 ## Usage
 
