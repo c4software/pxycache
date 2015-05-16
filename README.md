@@ -1,11 +1,14 @@
 pxyCache
 ========
 
-PxyCache is a simple Proxy, With offline capacities. pxyCache also provide an Admin Panel to help developpers to see and manage the cache of his "Proxy".
+PxyCache is a simple Proxy, With offline capacities. pxyCache also provide an Admin Panel to see and manage the cache of the "Proxy".
 
 The term « Proxy » means all request you made (GET, POST) on http://localhost:5000/ are automaticaly send to the real server you have config.
 
 I made this tool to be less dependent from the Back Office in the developpement process. I can work even if the Back office became unavailable.
+
+## Todo
+- Store headers in cache.
 
 ## Usage
 
